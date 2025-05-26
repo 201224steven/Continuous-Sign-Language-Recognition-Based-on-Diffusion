@@ -1,0 +1,65 @@
+feeder: dataset.dataloader_video.BaseFeeder
+phase: test
+# dataset: CSL-Daily
+# dataset: CSL
+# dataset: phoenix2014-T
+dataset: phoenix2014
+num_epoch: 25
+work_dir: ./work_dir/2014/
+batch_size: 2
+random_seed: 0
+test_batch_size: 2
+num_worker: 6
+device: 0
+log_interval: 10000
+eval_interval: 1
+save_interval: 1
+# python in default
+evaluate_tool: sclite
+loss_weights:
+  SeqCTC: 1.0
+  # VAC
+  ConvCTC: 1.0
+  # FuseCTC: 1.0
+  Dist: 25.0
+# Diffusion loss
+  Diff: 10.0
+  Step: 0.1
+# GLOSS-SENTENCE loss
+#  CLIP: 10.0
+#  CDist: 1.0
+# Frame-wise supervision
+  # SeqMse: 1.0
+  # ConvMse: 1.0
+#  Contras: 0.5
+load_weights: '/home/lyn/GX/dev_16.10_epoch2_model_17.9.pt'
+
+
+optimizer_args:
+  optimizer: Adam
+  base_lr: 0.00005
+  step: [ 5, 10, 15, 20]
+  learning_ratio: 0.001  # 进行cross-attention的训练时为0.001, 使用phoenix2014T的数据作为预训练数据时为0.01
+  weight_decay: 0.0001
+  start_epoch: 0
+  nesterov: False
+
+feeder_args:
+  mode: 'train'
+  datatype: 'video'
+  num_gloss: -1
+  drop_ratio: 1.0
+  frame_interval: 1
+  image_scale: 1.0  # 0-1 represents ratio, >1 represents absolute value
+  input_size: 224
+
+model: slr_network.SLRModel
+decode_mode: beam
+model_args:
+  num_classes: 1296
+  c2d_type: resnet34 #resnet18, mobilenet_v2, squeezenet1_1, shufflenet_v2_x1_0, efficientnet_b1, mnasnet1_0, regnet_y_800mf, vgg16_bn, vgg11_bn, regnet_x_800mf, regnet_x_400mf, densenet121, regnet_y_1_6gf
+  conv_type: 2
+  use_bn: 1
+  # SMKD
+  share_classifier: True
+  weight_norm: True
